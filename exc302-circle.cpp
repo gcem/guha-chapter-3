@@ -2,8 +2,8 @@
 // circle.cpp
 //
 // This program draws a line loop with vertices equally apart on 
-// a fixed circle. The larger the number of vertices the better
-// the loop approximates the circle.
+// a fixed circle using vertex arrays. The larger the number of 
+// vertices the better the loop approximates the circle.
 //
 // Interaction:
 // Press +/- to increase/decrease the number of vertices of the loop. 
@@ -44,8 +44,9 @@ void calculateVertices(void)
   free(vertices);
   free(colors);
 
-  vertices = (float*) malloc(numVertices * sizeof(float) * 3);
-  colors = (float*) malloc(numVertices * sizeof(float) * 3);
+  // allocate arrays
+  if ((vertices = (float*) malloc(numVertices * sizeof(float) * 3)) == NULL) exit(1);
+  if ((colors = (float*) malloc(numVertices * sizeof(float) * 3)) == NULL) exit(1);
 
   // calculate vertices
   for (int i = 0; i < numVertices; i++)
@@ -66,12 +67,9 @@ void calculateVertices(void)
 // Drawing routine.
 void drawScene(void)
 {  
-  float t = 0; // Angle parameter.
   int i;
 
   glClear(GL_COLOR_BUFFER_BIT);
-
-  glColor3f(0.0, 0.0, 0.0);
 
   glVertexPointer(3, GL_FLOAT, 0, vertices);
   glColorPointer(3, GL_FLOAT, 0, colors);

@@ -68,8 +68,8 @@ void updateVertexArray()
 	  indices[i * (p + 1) + 2 * j + 1] = (i + 1) * p + j;
 	}
       // repeat the first two vertices
-      indices[i * (p + 1) + 2 * p] = i * p;
-      indices[i * (p + 1) + 2 * p + 1] = (i + 1) * p;
+      indices[2 * i * (p + 1) + 2 * p] = i * p;
+      indices[2 * i * (p + 1) + 2 * p + 1] = (i + 1) * p;
     }
 }
 

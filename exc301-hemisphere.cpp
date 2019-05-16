@@ -53,7 +53,7 @@ void updateVertexArray()
   
   // allocate index array
   free(indices);
-  if ((indices = (unsigned int*) malloc(2 * (p + 2) * q * sizeof(unsigned int))) == NULL) exit(1);
+  if ((indices = (unsigned int*) malloc(2 * (p + 1) * (q + 1) * sizeof(unsigned int))) == NULL) exit(1);
 
   // find vertex coordinates and create the index list, line by line
   for (i = 0; i <= q; i++)
@@ -64,8 +64,8 @@ void updateVertexArray()
 	  vertices[p * i * 3 + j * 3 + 1] = R * sin(PI / 2 * i / q); // y
 	  vertices[p * i * 3 + j * 3 + 2] = R * cos(PI / 2 * i / q)  * sin(2 * PI * j / p); // z
 
-	  indices[i * (p + 1) + 2 * j] = i * p + j;
-	  indices[i * (p + 1) + 2 * j + 1] = (i + 1) * p + j;
+	  indices[2 * i * (p + 1) + 2 * j] = i * p + j;
+	  indices[2 * i * (p + 1) + 2 * j + 1] = (i + 1) * p + j;
 	}
       // repeat the first two vertices
       indices[2 * i * (p + 1) + 2 * p] = i * p;

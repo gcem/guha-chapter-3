@@ -108,8 +108,8 @@ void drawScene(void)
   // above the other from the equator to the north pole.
   for (i = 0; i < q; i++)
     {
-      // draw the strip
-      glDrawElements(GL_TRIANGLE_STRIP, 2 * (p + 1), GL_UNSIGNED_INT, indices + i * (p + 1));
+      // draw the i-th strip
+      glDrawElements(GL_TRIANGLE_STRIP, 2 * (p + 1), GL_UNSIGNED_INT, indices + 2 * i * (p + 1));
     }
 
   glFlush();

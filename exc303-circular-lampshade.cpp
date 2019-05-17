@@ -26,11 +26,42 @@ using namespace std;
 
 static float R = 30.0;
 static int wire = 1;
+static float vertices[VERTICES * 3 * 2];
+static int indices[(VERTICES + 1) * 2];
+
+void calculateVertices()
+{
+  int i, index = 0;
+  for (i = 0; i < VERTICES; i++)
+    {
+      vertices[index++] = R * cos(2.0 * PI * i / VERTICES);
+      vertices[index++] = -20.0;
+      vertices[index++] = R * sin(2.0 * PI * i / VERTICES);
+      
+      vertices[index++] = (R / 2 * cos(2.0 * PI * i / VERTICES));
+      vertices[index++] = 20.0;
+      vertices[index++] = R / 2 * sin(2.0 * PI * i / VERTICES);
+    }
+}
+
+void initIndices()
+{
+  int i;
+  for (i = 0; i < VERTICES * 2; i++)
+    indices[i] = i;
+  indices[VERTICES * 2] = 0;
+  indices[VERTICES * 2 + 1] = 1;
+}
 
 // Initialization routine.
 void setup(void) 
 {
-  glClearColor(1.0, 1.0, 1.0, 0.0); 
+  glClearColor(1.0, 1.0, 1.0, 0.0);
+  calculateVertices();
+  initIndices();
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3, GL_FLOAT, 0, vertices);
 }
 
 // Drawing routine.
@@ -49,17 +80,8 @@ void drawScene(void)
   else
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  glBegin(GL_TRIANGLE_STRIP);
-  for(i = 0; i <= VERTICES; i++)
-    {
-      glVertex3f(R * cos(2.0 * PI * i / VERTICES),
-		 -20.0,
-		 R * sin(2.0 * PI * i / VERTICES));
-      glVertex3f(R / 2 * cos(2.0 * PI * i / VERTICES),
-		 20.0,
-		 R / 2 * sin(2.0 * PI * i / VERTICES));
-    }
-  glEnd();
+  glDrawElements(GL_TRIANGLE_STRIP, (VERTICES + 1) * 2, GL_UNSIGNED_INT, indices);
+  
   glFlush();
 }
 

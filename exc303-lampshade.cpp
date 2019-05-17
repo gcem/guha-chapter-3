@@ -27,6 +27,26 @@
 using namespace std;
 
 static int wire = 1;
+static float vertices[] = {
+  -20.0, -20.0, 15.0,
+  20.0, -20.0, 15.0,
+  20.0, 20.0, 15.0,
+  -20.0, 20.0, 15.0,
+
+  -20.0, -20.0, -15.0,
+  20.0, -20.0, -15.0,
+  20.0, 20.0, -15.0,
+  -20.0, 20.0, -15.0,
+};
+static unsigned int sideIndices[] = {
+  0, 4, 1, 5, 2, 6, 3, 7, 0, 4
+};
+static unsigned int backIndices[] = {
+  4, 5, 7, 6
+};
+static unsigned int *indices[] = {sideIndices, backIndices};
+static int count[] = {10, 4};
+  
 
 void drawScene(void)
 {
@@ -45,28 +65,7 @@ void drawScene(void)
   else
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   
-  glBegin(GL_TRIANGLE_STRIP);
-  glVertex3f(20.0, -20.0, 15.0); // bottom right, front
-  glVertex3f(20.0, -20.0, -15.0); // bottom right, back
-  glVertex3f(-20.0, -20.0, 15.0);
-  glVertex3f(-20.0, -20.0, -15.0);
-
-  glVertex3f(-20.0, 20.0, 15.0);
-  glVertex3f(-20.0, 20.0, -15.0); 
-  glVertex3f(20.0, 20.0, 15.0);
-  glVertex3f(20.0, 20.0, -15.0);
-
-  glVertex3f(20.0, -20.0, 15.0);
-  glVertex3f(20.0, -20.0, -15.0);
-  glEnd();
-  
-  //back side
-  glBegin(GL_TRIANGLE_STRIP);
-  glVertex3f(-20.0, -20.0, -15.0);
-  glVertex3f(20.0, -20.0, -15.0);
-  glVertex3f(-20.0, 20.0, -15.0);
-  glVertex3f(20.0, 20.0, -15.0);
-  glEnd();
+  glMultiDrawElements(GL_TRIANGLE_STRIP, count, GL_UNSIGNED_INT, (void**) indices, 2);
   
   glFlush();
 }
@@ -74,6 +73,9 @@ void drawScene(void)
 void setup(void)
 {
   glClearColor(1.0, 1.0, 1.0, 0.0);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3, GL_FLOAT, 0, vertices);
 }
 
 void resize(int width, int height)

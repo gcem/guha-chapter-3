@@ -28,50 +28,76 @@ using namespace std;
 // Global variables
 static float X = 50;
 static float Y = 50;
+static float R[] = {40.0, 33.0, 26.0, 19.0, 12.0};
+static float depth[] = {0.1, 0.2, 0.3, 0.4, 0.5};
+static float colorVal[] = {
+  0.0, 0.8, 0.0,
+  0.9, 0.0, 0.0,
+  0.0, 0.0, 0.8,
+  0.8, 0.8, 0.0,
+  0.7, 0.0, 0.9
+};
+static float vertices[(VERTICES + 2) * 3 * 5];
+static float colors[(VERTICES + 2) * 3 * 5];
+static int count[5];
+static int first[5];
 
-void drawCircle(float x, float y, float r, float depth)
+
+void initializeArrays()
 {
   float angle;
-
-  glBegin(GL_TRIANGLE_FAN);
-  glVertex3f(x, y, 0.0);
-  for (int i = 0; i <= VERTICES; i++)
+  int i, j, index = 0;
+  // for each circle
+  for (i = 0; i < 5; i++)
     {
-      angle = 2 * PI * i / (float) VERTICES;
-      glVertex3f(x + cos(angle) * r, y + sin(angle) * r, depth);
+      first[i] = (VERTICES + 2) * i;
+      count[i] = VERTICES + 2;
+
+      // center
+      colors[index] = colorVal[i * 3];
+      vertices[index++] = X;
+      
+      colors[index] = colorVal[i * 3 + 1];
+      vertices[index++] = Y;
+      
+      colors[index] = colorVal[i * 3 + 2];
+      vertices[index++] = depth[i];
+
+      // vertices
+      for (j = 0; j <= VERTICES; j++)
+	{
+	  angle = 2 * PI * j / (float) VERTICES;
+	  
+	  colors[index] = colorVal[i * 3];
+	  vertices[index++] = X + cos(angle) * R[i];
+	  
+	  colors[index] = colorVal[i * 3 + 1];
+	  vertices[index++] = Y + sin(angle) * R[i];
+	  
+	  colors[index] = colorVal[i * 3 + 2];
+	  vertices[index++] = depth[i];
+	}
     }
-  glEnd();
 }
 
 void drawScene(void)
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glEnable(GL_DEPTH_TEST);
+  glMultiDrawArrays(GL_TRIANGLE_FAN, first, count, 5);
   
-  glColor3f(0.0, 0.8, 0.0);
-  drawCircle(X, Y, 40.0, 0.1);
-
-  glColor3f(0.9, 0.0, 0.0);
-  drawCircle(X, Y, 33.0, 0.2);
-
-  glColor3f(0.0, 0.0, 0.8);
-  drawCircle(X, Y, 26.0, 0.3);
-
-  glColor3f(0.8, 0.8, 0.0);
-  drawCircle(X, Y, 19.0, 0.4);
-
-  glColor3f(0.7, 0.0, 0.9);
-  drawCircle(X, Y, 12.0, 0.5);  
-  
-  glDisable(GL_DEPTH_TEST);
-
   glFlush();
 }
 
 void setup(void)
 {
   glClearColor(1.0, 1.0, 1.0, 0.0);
+  initializeArrays();
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_COLOR_ARRAY);
+
+  glVertexPointer(3, GL_FLOAT, 0, vertices);
+  glColorPointer(3, GL_FLOAT, 0, colors);
 }
 
 void resize(int width, int height)

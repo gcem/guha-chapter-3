@@ -47,7 +47,7 @@ void updateVertexArray()
   
   // allocate vertex array
   free(vertices);
-  if ((vertices = (float*) malloc(3 * p * (q + 1) * sizeof(float))) == NULL) exit(1);
+  if ((vertices = (float*) malloc(3 * (p * (q + 1) + 3) * sizeof(float))) == NULL) exit(1);
 
   glVertexPointer(3, GL_FLOAT, 0, vertices);
   
@@ -56,7 +56,7 @@ void updateVertexArray()
   if ((indices = (unsigned int*) malloc(2 * (p + 1) * (q + 1) * sizeof(unsigned int))) == NULL) exit(1);
 
   // find vertex coordinates and create the index list, line by line
-  for (i = 0; i <= q; i++)
+  for (i = 0; i <= q; i++) // all vertices will be the same when i=q, but the code is simpler this way
     {
       for (j = 0; j < p; j++)
 	{	  

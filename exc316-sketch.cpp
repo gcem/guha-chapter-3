@@ -1,14 +1,11 @@
-///////////////////////////////////////////////////////////////////////////////////         
 // 
-// Saves every single pixel that the mouse passes through and draws those points
-// each time a new one is added. A horrible way of coding a sketchpad :D
+// Saves the position each time the mouse moves draws all saved points
+// each time a new one is added.
 // 
 // Interaction:
 // Drag with the left mouse button to sketch on the canvas
 // right mouse click to exit.
 // 
-// Sumanta Guha.
-/////////////////////////////////////////////////////////////////////////////////// 
 
 #include <cstdlib>
 #include <vector>
@@ -99,6 +96,7 @@ void mouseControl(int button, int state, int x, int y)
       points.push_back(Point(x, height - y));
       glutPostRedisplay();
     }
+  else if (button == GLUT_RIGHT_BUTTON) exit(0);
 }
 
 // Mouse motion callback routine.

@@ -27,7 +27,6 @@
 #endif
 
 #define PI 3.14159265358979324
-#define VERTICES 7
 
 using namespace std;
 
@@ -35,18 +34,24 @@ using namespace std;
 static float R = 40.0; // Radius of circle.
 static float X = 50.0; // X-coordinate of center of circle.
 static float Y = 50.0; // Y-coordinate of center of circle.
-static float vertices[VERTICES * 3];
-static float colors[VERTICES * 3];
+static int numVertices = 7;
+static float *vertices = NULL;
+static float *colors = NULL;
 static unsigned int buffer[1];
+
+static int sizeVertices;
 
 void fillVertices()
 {
   int i, index = 0;
   float angle;
+
+  vertices = new float[numVertices * 3];
+  sizeVertices = numVertices * 3 * sizeof(float);
   
-  for (i = 0; i < VERTICES; i++)
+  for (i = 0; i < numVertices; i++)
     {
-      angle = 2 * PI * i / VERTICES;
+      angle = 2 * PI * i / numVertices;
       vertices[index++] = X + R * cos(angle);
       vertices[index++] = Y + R * sin(angle);
       vertices[index++] = 0;
@@ -56,8 +61,10 @@ void fillVertices()
 void fillColors()
 {
   int i, index = 0;
-    
-  for (i = 0; i < VERTICES; i++)
+
+  colors = new float[numVertices * 3];
+  
+  for (i = 0; i < numVertices; i++)
     {
       colors[index++] = (float) rand() / (float) RAND_MAX;
       colors[index++] = (float) rand() / (float) RAND_MAX;
@@ -65,7 +72,17 @@ void fillColors()
     }
 }
 
-void setVBO()
+void updateVBO()
+{
+  glBufferData(GL_ARRAY_BUFFER, 2 * sizeVertices, NULL, GL_STATIC_DRAW);
+
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeVertices, vertices);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeVertices, sizeVertices, colors);
+
+  glColorPointer(3, GL_FLOAT, 0, (void*) (sizeVertices));
+}
+
+void initVBO()
 {
   glGenBuffers(1, buffer);
 
@@ -73,13 +90,8 @@ void setVBO()
   glEnableClientState(GL_COLOR_ARRAY);
 
   glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(colors), NULL, GL_STATIC_DRAW);
-
-  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(colors), colors);
-
+  
   glVertexPointer(3, GL_FLOAT, 0, 0);
-  glColorPointer(3, GL_FLOAT, 0, (void*) sizeof(vertices));
 }
 
 // Drawing routine.
@@ -92,7 +104,7 @@ void drawScene(void)
 
    glColor3f(0.0, 0.0, 0.0);
 
-   glDrawArrays(GL_LINE_LOOP, 0, VERTICES);
+   glDrawArrays(GL_LINE_LOOP, 0, numVertices);
    
    glFlush();
 }
@@ -101,9 +113,11 @@ void drawScene(void)
 void setup(void) 
 {
    glClearColor(1.0, 1.0, 1.0, 0.0);
+   initVBO();
+
    fillVertices();
    fillColors();
-   setVBO();     
+   updateVBO();
 }
 
 // OpenGL window reshape routine.
@@ -125,14 +139,20 @@ void keyInput(unsigned char key, int x, int y)
       case 27:
          exit(0);
          break;
-      // case '+':
-      //    numVertices++;
-      //    glutPostRedisplay();
-      //    break;
-      // case '-':
-      //    if (numVertices > 3) numVertices--;
-      //    glutPostRedisplay();
-      //    break;
+      case '+':
+         numVertices++;
+	 fillVertices();
+	 fillColors();
+	 updateVBO();
+         glutPostRedisplay();
+         break;
+      case '-':
+         if (numVertices > 3) numVertices--;
+	 fillVertices();
+	 fillColors();
+	 updateVBO();
+         glutPostRedisplay();
+         break;
       default:
          break;
    }

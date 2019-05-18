@@ -27,6 +27,7 @@
 #endif
 
 #define PI 3.14159265358979324
+#define VERTICES 7
 
 using namespace std;
 
@@ -34,7 +35,52 @@ using namespace std;
 static float R = 40.0; // Radius of circle.
 static float X = 50.0; // X-coordinate of center of circle.
 static float Y = 50.0; // Y-coordinate of center of circle.
-static int numVertices = 5; // Number of vertices on circle.
+static float vertices[VERTICES * 3];
+static float colors[VERTICES * 3];
+static unsigned int buffer[1];
+
+void fillVertices()
+{
+  int i, index = 0;
+  float angle;
+  
+  for (i = 0; i < VERTICES; i++)
+    {
+      angle = 2 * PI * i / VERTICES;
+      vertices[index++] = X + R * cos(angle);
+      vertices[index++] = Y + R * sin(angle);
+      vertices[index++] = 0;
+    }
+}
+
+void fillColors()
+{
+  int i, index = 0;
+    
+  for (i = 0; i < VERTICES; i++)
+    {
+      colors[index++] = (float) rand() / (float) RAND_MAX;
+      colors[index++] = (float) rand() / (float) RAND_MAX;
+      colors[index++] = (float) rand() / (float) RAND_MAX;
+    }
+}
+
+void setVBO()
+{
+  glGenBuffers(1, buffer);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_COLOR_ARRAY);
+
+  glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(colors), NULL, GL_STATIC_DRAW);
+
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(colors), colors);
+
+  glVertexPointer(3, GL_FLOAT, 0, 0);
+  glColorPointer(3, GL_FLOAT, 0, (void*) sizeof(vertices));
+}
 
 // Drawing routine.
 void drawScene(void)
@@ -46,24 +92,18 @@ void drawScene(void)
 
    glColor3f(0.0, 0.0, 0.0);
 
-   // Draw a line loop with vertices at equal angles apart on a circle
-   // with center at (X, Y) and radius R, The vertices are colored randomly.
-   glBegin(GL_LINE_LOOP);
-      for(i = 0; i < numVertices; ++i)
-	  {
-         glColor3f((float)rand()/(float)RAND_MAX, (float)rand()/(float)RAND_MAX, (float)rand()/(float)RAND_MAX); 
-         glVertex3f(X + R * cos(t), Y + R * sin(t), 0.0);
-         t += 2 * PI / numVertices;
-	  }
-   glEnd();
-
+   glDrawArrays(GL_LINE_LOOP, 0, VERTICES);
+   
    glFlush();
 }
 
 // Initialization routine.
 void setup(void) 
 {
-   glClearColor(1.0, 1.0, 1.0, 0.0); 
+   glClearColor(1.0, 1.0, 1.0, 0.0);
+   fillVertices();
+   fillColors();
+   setVBO();     
 }
 
 // OpenGL window reshape routine.
@@ -85,14 +125,14 @@ void keyInput(unsigned char key, int x, int y)
       case 27:
          exit(0);
          break;
-      case '+':
-         numVertices++;
-         glutPostRedisplay();
-         break;
-      case '-':
-         if (numVertices > 3) numVertices--;
-         glutPostRedisplay();
-         break;
+      // case '+':
+      //    numVertices++;
+      //    glutPostRedisplay();
+      //    break;
+      // case '-':
+      //    if (numVertices > 3) numVertices--;
+      //    glutPostRedisplay();
+      //    break;
       default:
          break;
    }

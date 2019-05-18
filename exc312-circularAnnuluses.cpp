@@ -97,12 +97,14 @@ void drawScene(void)
 
    // Write labels.
    glColor3f(0.0, 0.0, 0.0);
-   glRasterPos3f(15.0, 51.0, 0.0);
+   glRasterPos3f(16.0, 74.5, 0.0);
    writeBitmapString((void*)font, "Overwritten");
-   glRasterPos3f(69.0, 51.0, 0.0);
+   glRasterPos3f(69.0, 74.5, 0.0);
    writeBitmapString((void*)font, "Floating");
-   glRasterPos3f(38.0, 6.0, 0.0);
-   writeBitmapString((void*)font, "The real deal!");
+   glRasterPos3f(44.0, 30.5, 0.0);
+   writeBitmapString((void*)font, "The real");
+   glRasterPos3f(46.5, 27.5, 0.0);
+   writeBitmapString((void*)font, "deal!");
 
    glFlush();
 }

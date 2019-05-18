@@ -83,7 +83,9 @@ void setup()
 }
 
 void reshape(int w, int h)
-{
+{  
+  width = w;
+  height = h;
   glViewport(0, 0, width, height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();

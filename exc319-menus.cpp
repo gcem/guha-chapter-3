@@ -25,8 +25,17 @@
 
 using namespace std;
 
+#define FILLED 0
+#define OUTLINED 1
+#define LARGE 80
+#define MEDIUM 60
+#define SMALL 40
+
+
 // Globals.
 static float square_color[3] = {1.0, 0.0, 0.0}; // Color of the square.
+static float width = MEDIUM, height = MEDIUM;
+static int mode = FILLED;
 
 // Drawing routine.
 void drawScene(void)
@@ -34,11 +43,12 @@ void drawScene(void)
    glClear (GL_COLOR_BUFFER_BIT);
 
    glColor3fv(square_color);
-   glBegin(GL_POLYGON);
-      glVertex3f(20.0, 20.0, 0.0);
-      glVertex3f(80.0, 20.0, 0.0);
-      glVertex3f(80.0, 80.0, 0.0);
-      glVertex3f(20.0, 80.0, 0.0);
+   if (mode == FILLED) glBegin(GL_POLYGON);
+   if (mode == OUTLINED) glBegin(GL_LINE_LOOP);
+      glVertex3f(50 - width / 2, 50 - height / 2, 0.0);
+      glVertex3f(50 + width / 2, 50 - height / 2, 0.0);
+      glVertex3f(50 + width / 2, 50 + height / 2, 0.0);
+      glVertex3f(50 - width / 2, 50 + height / 2, 0.0);
    glEnd();
 
    glFlush();
@@ -95,20 +105,90 @@ void color_menu(int id)
    glutPostRedisplay();
 }
 
+void mode_menu(int id)
+{
+  switch (id)
+    {
+    case 4:
+      mode = FILLED;
+      break;
+    case 5:
+      mode = OUTLINED;
+      break;
+    }
+  glutPostRedisplay();
+}
+void width_menu(int id)
+{
+  switch (id)
+    {
+    case 6:
+      width = SMALL;
+      break;
+    case 7:
+      width = MEDIUM;
+      break;
+    case 8:
+      width = LARGE;
+      break;
+    }
+  glutPostRedisplay();
+}
+void height_menu(int id)
+{
+  switch (id)
+    {
+    case 9:
+      height = SMALL;
+      break;
+    case 10:
+      height = MEDIUM;
+      break;
+    case 11:
+      height = LARGE;
+      break;
+    }
+  glutPostRedisplay();
+}
+void size_menu(int id)
+{
+}
+
+
 // Routine to make the menu.
 void makeMenu(void)
 {
    // The sub-menu is created first (because it should be visible when the top
    // menu is created): its callback function is registered and menu entries added.
-   int sub_menu;
-   sub_menu = glutCreateMenu(color_menu);
+  int colorMenu, modeMenu, sizeMenu, widthMenu, heightMenu;
+   colorMenu = glutCreateMenu(color_menu);
    glutAddMenuEntry("Red", 2);
-   glutAddMenuEntry("Blue",3);
+   glutAddMenuEntry("Blue", 3);
 
+   modeMenu = glutCreateMenu(mode_menu);
+   glutAddMenuEntry("Filled", 4);
+   glutAddMenuEntry("Outlined", 5);
+
+   widthMenu = glutCreateMenu(width_menu);
+   glutAddMenuEntry("Small", 6);
+   glutAddMenuEntry("Medium", 7);
+   glutAddMenuEntry("Large", 8);
+
+   heightMenu = glutCreateMenu(height_menu);
+   glutAddMenuEntry("Small", 9);
+   glutAddMenuEntry("Medium", 10);
+   glutAddMenuEntry("Large", 11);
+
+   sizeMenu = glutCreateMenu(size_menu);
+   glutAddSubMenu("Width", widthMenu);
+   glutAddSubMenu("Height", heightMenu);
+   
    // The top menu is created: its callback function is registered and menu entries,
    // including a submenu, added.
    glutCreateMenu(top_menu);
-   glutAddSubMenu("Color", sub_menu);
+   glutAddSubMenu("Color", colorMenu);
+   glutAddSubMenu("Mode", modeMenu);
+   glutAddSubMenu("Size", sizeMenu);
    glutAddMenuEntry("Quit",1);
 
    // The menu is attached to a mouse button.

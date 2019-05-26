@@ -75,4 +75,17 @@ class Hexagon : public Circle
   float angle;
 };
 
+class Text : public std::string
+{
+ public:
+  Text() {}
+  Text(float x, float y, float scale)
+    : x { x }, y { y }, scale { scale }, std::string() { }
+  void drawText();
+  void addChar(char c) { *this += c; }
+  void removeChar() { this->pop_back(); }
+ private:
+  float x, y, scale;
+};
+
 #endif

@@ -54,3 +54,13 @@ void Circle::draw(int vertexCount, float angle)
     }
   glEnd();
 }
+
+void Text::drawText()
+{
+  glPushMatrix();
+  glTranslatef(x, y, 0.0);
+  glScalef(scale, scale, 1.0);
+  for (int i = 0; i < this->length(); i++)
+    glutStrokeCharacter(GLUT_STROKE_ROMAN, (*this)[i]);
+  glPopMatrix();
+}

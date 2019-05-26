@@ -36,7 +36,8 @@ using namespace std;
 #define RECTANGLE 3
 #define CIRCLE 4
 #define HEXAGON 5
-#define NUMBERPRIMITIVES 6
+#define TEXT 6
+#define NUMBERPRIMITIVES 7
 
 // Use the STL extension of C++.
 using namespace std;
@@ -56,6 +57,7 @@ Line currentLine;
 Rect currentRect;
 Circle currentCircle;
 Hexagon currentHexagon;
+Text currentText;
 
 // Vectors of primitives
 vector<Point> points;
@@ -63,6 +65,7 @@ vector<Line> lines;
 vector<Rect> rectangles;
 vector<Circle> circles;
 vector<Hexagon> hexagons;
+vector<Text> texts;
 
 // Function to draw all points in the points array.
 void drawPoints(void)
@@ -133,6 +136,21 @@ void drawRectangles(void)
   while(iter != end)
     {
       iter->drawRectangle();
+      iter++;
+    }
+}
+
+void drawTexts()
+{
+  vector<Text>::iterator iter;
+  vector<Text>::const_iterator end; 
+  // Loop through the rectangles array drawing each rectangle.
+  iter = texts.begin();
+  end = texts.end();
+  
+  while(iter != end)
+    {
+      iter->drawText();
       iter++;
     }
 }
@@ -214,6 +232,23 @@ void drawHexagonSelectionIcon(void)
 	  0.05*width + 0.035 * min(width, height), 0.95*height - height * HEXAGON / 10.0).drawHexagon();
 }
 
+void drawTextSelectionIcon(void)
+{
+  glColor3f(0.0, 0.0, 0.0);
+  glPushMatrix();
+  glTranslatef(0.02*width, 0.915*height - height * TEXT / 10.0, 0.0);
+  glScalef(0.3 * width / 500, 0.3 * height / 500, 1.0);
+  glLineWidth(2);
+  glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, 'T');
+  glLineWidth(1);
+  glPopMatrix();
+  
+  // glRasterPos3f(0.22*width, 0.915*height - height * TEXT / 10.0, 0.0);
+  // glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'T');
+}
+
+
+
 // Function to draw unused part of left selection area.
 void drawInactiveArea(void)
 {
@@ -285,11 +320,21 @@ void drawScene(void)
 	{
 	  currentHexagon.drawHexagon();
 	}
+      else if (primitive == TEXT)
+	{
+	  currentText.drawText();
+	}
     }
   
   // these should be at the beginning, otherwise they draw over selection boxes
   drawCircles(); 
   drawHexagons();
+  drawPoints();
+  drawLines();
+  drawRectangles();
+  drawTexts();
+
+
   
   drawSelectionBoxes();
   drawPointSelectionIcon();
@@ -298,13 +343,11 @@ void drawScene(void)
   drawRectangleSelectionIcon();
   drawCircleSelectionIcon();
   drawHexagonSelectionIcon();
+  drawTextSelectionIcon();
   drawInactiveArea();
 
-  drawPoints();
-  drawLines();
-  drawRectangles();
-
-  if(pointCount == 1) drawTempPoint();
+  
+  if(pointCount) drawTempPoint();
   if (isGrid) drawGrid();
 
   glutSwapBuffers();
@@ -325,7 +368,12 @@ void mouseControl(int button, int state, int x, int y)
     {
       y = height - y; // Correct from mouse to OpenGL co-ordinates.
 
-      
+      if (primitive == TEXT)
+	{
+	  texts.push_back(currentText);
+	  currentText.clear();
+	  pointCount = 0;
+	}
       // Click outside canvas - do nothing.
       if ( x < 0 || x > width || y < 0 || y > height ) ;
 
@@ -345,6 +393,8 @@ void mouseControl(int button, int state, int x, int y)
 	      else
 		{
 		  pointCount++;
+		  tempX = x;
+		  tempY = y;
 		  if (primitive == LINE || primitive == POLYLINE) 
 		    {	      
 		      currentLine = Line(x, y, x, y);
@@ -360,6 +410,10 @@ void mouseControl(int button, int state, int x, int y)
 		  else if (primitive == HEXAGON)
 		    {
 		      currentHexagon = Hexagon(x, y, x, y);
+		    }
+		  else if (primitive == TEXT)
+		    {
+		      currentText = Text(x, y, 0.3);
 		    }
 		}
 	    }
@@ -447,13 +501,20 @@ void resize(int w, int h)
 // Keyboard input processing routine.
 void keyInput(unsigned char key, int x, int y)
 {
-  switch (key) 
+  if (key == 27)
+    exit(0);
+  else if (primitive == TEXT && pointCount)
     {
-    case 27:
-      exit(0);
-      break;
-    default:
-      break;
+      if (32 <= key && key <= 127) // typed character in text mode
+	currentText.addChar(key);
+      else if (key == 13) // carriage return
+	{
+	  pointCount = 0;
+	  texts.push_back(currentText);
+	}
+      else if (key == 8) // backspace
+	currentText.removeChar();
+      glutPostRedisplay();
     }
 }
 

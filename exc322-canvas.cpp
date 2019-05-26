@@ -25,6 +25,8 @@
 #pragma comment(lib, "glew32.lib") 
 #endif
 
+#include "exc322-objects.h"
+
 using namespace std;
 
 #define INACTIVE -1
@@ -32,7 +34,8 @@ using namespace std;
 #define LINE 1
 #define POLYLINE 2
 #define RECTANGLE 3
-#define NUMBERPRIMITIVES 4
+#define CIRCLE 4
+#define NUMBERPRIMITIVES 5
 
 // Use the STL extension of C++.
 using namespace std;
@@ -45,36 +48,18 @@ static int pointCount = 0; // Number of  specified points.
 static int tempX, tempY; // Co-ordinates of clicked point.
 static int isGrid = 1; // Is there grid?
 
-// Point class.
-class Point
-{
-public:
-  Point(int xVal, int yVal)
-  {
-    x = xVal; y = yVal;
-  }
-  void drawPoint(void); // Function to draw a point.
-private:
-  int x, y; // x and y co-ordinates of point.
-  static float size; // Size of point.
-};
 
 float Point::size = pointSize; // Set point size.
 
-// Function to draw a point.
-void Point::drawPoint()
-{  
-  glPointSize(size);
-  glBegin(GL_POINTS);
-  glVertex3f(x, y, 0.0);
-  glEnd();   
-}
-
-// Vector of points.
+// Vectors of primitives
 vector<Point> points;
+vector<Line> lines;
+vector<Rect> rectangles;
 
-// Iterator to traverse a Point array.
+// Iterators to traverse primitive arrays
 vector<Point>::iterator pointsIterator; 
+vector<Line>::iterator linesIterator;
+vector<Rect>::iterator rectanglesIterator;
 
 // Function to draw all points in the points array.
 void drawPoints(void)
@@ -83,39 +68,10 @@ void drawPoints(void)
   pointsIterator = points.begin();
   while(pointsIterator != points.end() )
     {
-      pointsIterator->drawPoint();
+      pointsIterator->drawPoint(pointSize);
       pointsIterator++;
     }
 }
-
-// Line class.
-class Line
-{
-public:
-  Line(int x1Val, int y1Val, int x2Val, int y2Val)
-  {
-    x1 = x1Val; y1 = y1Val; x2 = x2Val; y2 = y2Val;
-  }
-  void drawLine();
-private:
-  int x1, y1, x2, y2; // x and y co-ordinates of endpoints.
-};
-
-
-// Function to draw a line.
-void Line::drawLine()
-{
-  glBegin(GL_LINES);
-  glVertex3f(x1, y1, 0.0);
-  glVertex3f(x2, y2, 0.0);
-  glEnd();
-}
-
-// Vector of lines.
-vector<Line> lines;
-
-// Iterator to traverse a Line array.
-vector<Line>::iterator linesIterator;
 
 // Function to draw all lines in the lines array.
 void drawLines(void)
@@ -129,31 +85,6 @@ void drawLines(void)
     }
 }
 
-// Rectangle class.
-class Rect
-{
-public:
-  Rect(int x1Val, int y1Val, int x2Val, int y2Val)
-  {
-    x1 = x1Val; y1 = y1Val; x2 = x2Val; y2 = y2Val;
-  }
-  void drawRectangle();
-private:
-  int x1, y1, x2, y2; // x and y co-ordinates of diagonally opposite vertices.
-};
-
-// Function to draw a rectangle.
-void Rect::drawRectangle()
-{
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glRectf(x1, y1, x2, y2);
-}
-
-// Vector of rectangles.
-vector<Rect> rectangles;
-
-// Iterator to traverse a Rect array.
-vector<Rect>::iterator rectanglesIterator;
 
 // Function to draw all rectangles in the rectangles array.
 void drawRectangles(void)

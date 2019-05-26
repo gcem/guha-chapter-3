@@ -1,0 +1,38 @@
+#ifdef __APPLE__
+#  include <GL/glew.h>
+#  include <GL/freeglut.h>
+#  include <OpenGL/glext.h>
+#else
+#  include <GL/glew.h>
+#  include <GL/freeglut.h>
+#  include <GL/glext.h>
+#pragma comment(lib, "glew32.lib") 
+#endif
+
+#include "exc322-objects.h"
+
+// Function to draw a point.
+void Point::drawPoint(float size)
+{  
+  glPointSize(size);
+  glBegin(GL_POINTS);
+  glVertex3f(x, y, 0.0);
+  glEnd();   
+}
+
+// Function to draw a line.
+void Line::drawLine()
+{
+  glBegin(GL_LINES);
+  glVertex3f(x1, y1, 0.0);
+  glVertex3f(x2, y2, 0.0);
+  glEnd();
+}
+
+// Function to draw a rectangle.
+void Rect::drawRectangle()
+{
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glRectf(x1, y1, x2, y2);
+}
+

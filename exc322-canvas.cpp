@@ -9,7 +9,7 @@
 // Right click for menu options.
 //
 
-
+#include <cmath>
 #include <cstdlib>
 #include <vector>
 #include <iostream>
@@ -55,11 +55,13 @@ float Point::size = pointSize; // Set point size.
 vector<Point> points;
 vector<Line> lines;
 vector<Rect> rectangles;
+vector<Circle> circles;
 
 // Iterators to traverse primitive arrays
 vector<Point>::iterator pointsIterator; 
 vector<Line>::iterator linesIterator;
 vector<Rect>::iterator rectanglesIterator;
+vector<Circle>::iterator circlesIterator;
 
 // Function to draw all points in the points array.
 void drawPoints(void)
@@ -85,6 +87,16 @@ void drawLines(void)
     }
 }
 
+// draw circles
+void drawCircles()
+{
+  circlesIterator = circles.begin();
+  while (circlesIterator != circles.end())
+    {
+      circlesIterator->drawCircle();
+      circlesIterator++;
+    }
+}
 
 // Function to draw all rectangles in the rectangles array.
 void drawRectangles(void)
@@ -162,6 +174,12 @@ void drawRectangleSelectionIcon(void)
   glEnd();  
 }
 
+void drawCircleSelectionIcon(void)
+{
+  glColor3f(0.0, 0.0, 0.0);
+  Circle(0.05*width, 0.95*height - height * CIRCLE / 10.0, 0.03 * width).drawCircle();
+}
+
 // Function to draw unused part of left selection area.
 void drawInactiveArea(void)
 {
@@ -214,11 +232,14 @@ void drawScene(void)
   glClear(GL_COLOR_BUFFER_BIT);
   glColor3f(0.0, 0.0, 0.0); 
 
+  drawCircles(); // this should be at the beginning, otherwise it draws over selection boxes
+  
   drawSelectionBoxes();
   drawPointSelectionIcon();
   drawLineSelectionIcon();
   drawPolyLineSelectionIcon();
   drawRectangleSelectionIcon();
+  drawCircleSelectionIcon();
   drawInactiveArea();
 
   drawPoints();
@@ -260,169 +281,162 @@ void mouseControl(int button, int state, int x, int y)
       // Click in canvas.
       else
 	{
-	  if (primitive == POINT) points.push_back( Point(x,y) );
-	  else if (primitive == LINE) 
-	    { 
-	      if (pointCount == 0)
+	  if (pointCount == 0)
+	    {
+	      if (primitive == POINT) points.push_back(Point(x,y));
+	      else
 		{
 		  tempX = x; tempY = y;
 		  pointCount++;
 		}
-	      else 
-		{
+	    }
+	  else
+	    {
+	      if (primitive == LINE) 
+		{	      
 		  lines.push_back( Line(tempX, tempY, x, y) );
 		  pointCount = 0;
-		}	      
-	    }
-	  else if (primitive == POLYLINE) 
-	    { 
-	      if (pointCount == 0)
-		{
-		  tempX = x; tempY = y;
-		  pointCount++;
 		}
-	      else 
-		{
-		  lines.push_back( Line(tempX, tempY, x, y) );
+	      else if (primitive == POLYLINE) 
+		{ 
+	  	  lines.push_back( Line(tempX, tempY, x, y) );
 		  tempX = x; tempY = y;
+	
 		}
-	    }
-	  else if (primitive == RECTANGLE) 
-	    { 
-	      if (pointCount == 0)
-		{
-		  tempX = x; tempY = y;
-		  pointCount++;
-		}
-	      else 
-		{
+	      else if (primitive == RECTANGLE) 
+		{	
 		  rectangles.push_back( Rect(tempX, tempY, x, y) );
+		  pointCount = 0;
+		}
+	      else if (primitive == CIRCLE)
+		{
+		  circles.push_back(Circle(tempX, tempY, sqrt((x-tempX) * (x - tempX) + (y - tempY) * (y - tempY))));
 		  pointCount = 0;
 		}
 	    }
 	}
     }
-  else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
-    {
-      pointCount = 0;
-    }
-  glutPostRedisplay();
-}
-
-// OpenGL window reshape routine.
-void resize(int w, int h)
-{
-  glViewport(0, 0, w, h);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  // Set viewing box dimensions equal to window dimensions.
-  glOrtho(0.0, (float)w, 0.0, (float)h, -1.0, 1.0);
-   
-  // Pass the size of the OpenGL window to globals.
-  width = w; 
-  height = h;  
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
-// Keyboard input processing routine.
-void keyInput(unsigned char key, int x, int y)
-{
-  switch (key) 
-    {
-    case 27:
-      exit(0);
-      break;
-    default:
-      break;
-    }
-}
-
-// Clear the canvas and reset for fresh drawing.
-void clearAll(void)
-{
-  points.clear();
-  lines.clear();
-  rectangles.clear();
-  primitive = INACTIVE;
-  pointCount = 0;
-}
-
-// The right button menu callback function.
-void rightMenu(int id)
-{
-  if (id==1) 
-    {
-      clearAll();
+      else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
+	{
+	  pointCount = 0;
+	}
       glutPostRedisplay();
     }
-  if (id==2) exit(0);
-}
 
-// The sub-menu callback function.
-void grid_menu(int id)
-{
-  if (id==3) isGrid = 1;
-  if (id==4) isGrid = 0;
-  glutPostRedisplay();
-}
+  // OpenGL window reshape routine.
+  void resize(int w, int h)
+  {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
 
-// Function to create menu.
-void makeMenu(void)
-{
-  int sub_menu;
-  sub_menu = glutCreateMenu(grid_menu);
-  glutAddMenuEntry("On", 3);
-  glutAddMenuEntry("Off",4);
+    // Set viewing box dimensions equal to window dimensions.
+    glOrtho(0.0, (float)w, 0.0, (float)h, -1.0, 1.0);
+   
+    // Pass the size of the OpenGL window to globals.
+    width = w; 
+    height = h;  
 
-  glutCreateMenu(rightMenu);
-  glutAddSubMenu("Grid", sub_menu);
-  glutAddMenuEntry("Clear",1);
-  glutAddMenuEntry("Quit",2);
-  glutAttachMenu(GLUT_RIGHT_BUTTON);
-}
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+  }
 
-// Initialization routine.
-void setup(void) 
-{
-  glClearColor(1.0, 1.0, 1.0, 0.0); 
+  // Keyboard input processing routine.
+  void keyInput(unsigned char key, int x, int y)
+  {
+    switch (key) 
+      {
+      case 27:
+	exit(0);
+	break;
+      default:
+	break;
+      }
+  }
 
-  makeMenu(); // Create menu.
-}
+  // Clear the canvas and reset for fresh drawing.
+  void clearAll(void)
+  {
+    points.clear();
+    lines.clear();
+    rectangles.clear();
+    primitive = INACTIVE;
+    pointCount = 0;
+  }
 
-// Routine to output interaction instructions to the C++ window.
-void printInteraction(void)
-{
-  cout << "Interaction:" << endl;
-  cout << "Left click on a box on the left to select a primitive." << endl
-       << "Then left click on the drawing area: once for point, twice for line or rectangle." << endl
-       << "Right click for menu options." <<  endl; 
-}
+  // The right button menu callback function.
+  void rightMenu(int id)
+  {
+    if (id==1) 
+      {
+	clearAll();
+	glutPostRedisplay();
+      }
+    if (id==2) exit(0);
+  }
 
-// Main routine.
-int main(int argc, char **argv) 
-{
-  printInteraction();
-  glutInit(&argc, argv);
+  // The sub-menu callback function.
+  void grid_menu(int id)
+  {
+    if (id==3) isGrid = 1;
+    if (id==4) isGrid = 0;
+    glutPostRedisplay();
+  }
 
-  glutInitContextVersion(4, 3);
-  glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+  // Function to create menu.
+  void makeMenu(void)
+  {
+    int sub_menu;
+    sub_menu = glutCreateMenu(grid_menu);
+    glutAddMenuEntry("On", 3);
+    glutAddMenuEntry("Off",4);
 
-  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA); 
-  glutInitWindowSize(500, 500);
-  glutInitWindowPosition(100, 100); 
-  glutCreateWindow("canvas.cpp");
-  glutDisplayFunc(drawScene); 
-  glutReshapeFunc(resize);  
-  glutKeyboardFunc(keyInput);
-  glutMouseFunc(mouseControl); 
+    glutCreateMenu(rightMenu);
+    glutAddSubMenu("Grid", sub_menu);
+    glutAddMenuEntry("Clear",1);
+    glutAddMenuEntry("Quit",2);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+  }
 
-  glewExperimental = GL_TRUE;
-  glewInit();
+  // Initialization routine.
+  void setup(void) 
+  {
+    glClearColor(1.0, 1.0, 1.0, 0.0); 
 
-  setup(); 
+    makeMenu(); // Create menu.
+  }
 
-  glutMainLoop(); 
-}
+  // Routine to output interaction instructions to the C++ window.
+  void printInteraction(void)
+  {
+    cout << "Interaction:" << endl;
+    cout << "Left click on a box on the left to select a primitive." << endl
+	 << "Then left click on the drawing area: once for point, twice for line or rectangle." << endl
+	 << "Right click for menu options." <<  endl; 
+  }
+
+  // Main routine.
+  int main(int argc, char **argv) 
+  {
+    printInteraction();
+    glutInit(&argc, argv);
+
+    glutInitContextVersion(4, 3);
+    glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA); 
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(100, 100); 
+    glutCreateWindow("canvas.cpp");
+    glutDisplayFunc(drawScene); 
+    glutReshapeFunc(resize);  
+    glutKeyboardFunc(keyInput);
+    glutMouseFunc(mouseControl); 
+
+    glewExperimental = GL_TRUE;
+    glewInit();
+
+    setup(); 
+
+    glutMainLoop(); 
+  }

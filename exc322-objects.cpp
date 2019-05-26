@@ -1,3 +1,8 @@
+#include <cstdlib>
+#include <vector>
+#include <iostream>
+#include <cmath>
+
 #ifdef __APPLE__
 #  include <GL/glew.h>
 #  include <GL/freeglut.h>
@@ -10,7 +15,10 @@
 #endif
 
 #include "exc322-objects.h"
+#define PI 3.14159265358979324
+#define CIRCLE_VERTICES 30
 
+using namespace std;
 // Function to draw a point.
 void Point::drawPoint(float size)
 {  
@@ -36,3 +44,16 @@ void Rect::drawRectangle()
   glRectf(x1, y1, x2, y2);
 }
 
+void Circle::drawCircle()
+{
+  float angle;
+  glBegin(GL_LINE_LOOP);
+  for (int i = 0; i < CIRCLE_VERTICES; i++)
+    {
+      angle = 2 * PI * i / CIRCLE_VERTICES;
+      glVertex3f(x + r * cos(angle), y + r * sin(angle), 0.0);
+      cout << y + r * sin(angle) << endl;
+    }
+  glEnd();
+
+}

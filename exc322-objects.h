@@ -41,4 +41,15 @@ private:
   int x1, y1, x2, y2; // x and y co-ordinates of diagonally opposite vertices.
 };
 
+class Circle
+{
+ public:
+  Circle(float x, float y, float r)
+    : x { x }, y { y }, r { r } {}
+  void drawCircle();
+  
+ private:
+  float x, y, r;
+};
+
 #endif

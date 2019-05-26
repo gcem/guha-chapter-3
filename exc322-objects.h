@@ -49,9 +49,11 @@ class Rect
   void setStart(float a, float b) { x1 = a; y1 = b; }
   void setEnd(float a, float b) { x2 = a; y2 = b; }
   void setColor(float *c) {color[0] = c[0]; color[1] = c[1]; color[2] = c[2];}
+  void setMode(int filled) { isFilled = filled; }
  private:
   int x1, y1, x2, y2; // x and y co-ordinates of diagonally opposite vertices.
   float color[3] = {0, 0, 0};
+  int isFilled = 0;
 };
 
 class Circle
@@ -65,9 +67,11 @@ class Circle
   void setStart(float a, float b) { x = a; y = b; }
   void setEnd(float outX, float outY) { r = sqrt((x-outX) * (x - outX) + (y - outY) * (y - outY));}
   void setColor(float *c) {color[0] = c[0]; color[1] = c[1]; color[2] = c[2];}
+  void setMode(int filled) { isFilled = filled; }
  protected:
   float x, y, r;
   float color[3] = {0, 0, 0};
+  int isFilled = 0;
   void draw(int vertexCount, float angle);
 };
 

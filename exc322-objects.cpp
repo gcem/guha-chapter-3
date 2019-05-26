@@ -42,15 +42,26 @@ void Line::drawLine()
 void Rect::drawRectangle()
 {
   glColor3fv(color);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  if (isFilled)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  else
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glRectf(x1, y1, x2, y2);
 }
 
 void Circle::draw(int vertexCount, float angle)
 {
   glColor3fv(color);
-  glBegin(GL_LINE_LOOP);
-  for (int i = 0; i < vertexCount; i++)
+  if (isFilled)
+    {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      glBegin(GL_TRIANGLE_FAN);
+      glVertex3f(x, y, 0.0);
+    }
+  else
+      glBegin(GL_LINE_STRIP);
+
+  for (int i = 0; i <= vertexCount; i++)
     {
       angle += 2 * PI / vertexCount;
       glVertex3f(x + r * cos(angle), y + r * sin(angle), 0.0);

@@ -49,6 +49,7 @@ static int primitive = INACTIVE; // Current drawing primitive.
 static int pointCount = 0; // Number of  specified points.
 static int tempX, tempY; // Co-ordinates of clicked point.
 static int isGrid = 1; // Is there grid?
+static int isFilled = 0;
 static int gridSize = 10;
 static float color[3] = {0, 0, 0};
 
@@ -302,6 +303,14 @@ void drawScene(void)
 {
   glClear(GL_COLOR_BUFFER_BIT);
   glColor3f(0.0, 0.0, 0.0); 
+  
+  // these should be at the beginning, otherwise they draw over selection boxes
+  drawCircles(); 
+  drawHexagons();
+  drawPoints();
+  drawLines();
+  drawRectangles();
+  drawTexts();
 
   // draw the active primitive if there is one
   if (pointCount != 0)
@@ -327,16 +336,6 @@ void drawScene(void)
 	  currentText.drawText();
 	}
     }
-  
-  // these should be at the beginning, otherwise they draw over selection boxes
-  drawCircles(); 
-  drawHexagons();
-  drawPoints();
-  drawLines();
-  drawRectangles();
-  drawTexts();
-
-
   
   drawSelectionBoxes();
   drawPointSelectionIcon();
@@ -406,16 +405,19 @@ void mouseControl(int button, int state, int x, int y)
 		    {	
 		      currentRect = Rect(x, y, x, y);
 		      currentRect.setColor(color);
+		      currentRect.setMode(isFilled);
 		    }
 		  else if (primitive == CIRCLE)
 		    {
 		      currentCircle = Circle(x, y, 0);
 		      currentCircle.setColor(color);
+		      currentCircle.setMode(isFilled);
 		    }
 		  else if (primitive == HEXAGON)
 		    {
 		      currentHexagon = Hexagon(x, y, x, y);
 		      currentHexagon.setColor(color);
+		      currentHexagon.setMode(isFilled);
 		    }
 		  else if (primitive == TEXT)
 		    {
@@ -591,10 +593,23 @@ void grid_size_menu(int id)
     }
 }
 
+void mode_menu(int id)
+{
+  switch (id)
+    {
+    case 12:
+      isFilled = 1;
+      break;
+    case 13:
+      isFilled = 0;
+      break;
+    }
+}
+
 // Function to create menu.
 void makeMenu(void)
 {
-  int grid_sub, size_sub, color_sub;
+  int grid_sub, size_sub, color_sub, mode_sub;
   size_sub = glutCreateMenu(grid_size_menu);
   glutAddMenuEntry("Small", 5);
   glutAddMenuEntry("Medium", 6);
@@ -611,9 +626,13 @@ void makeMenu(void)
   glutAddMenuEntry("Green", 10);
   glutAddMenuEntry("Blue", 11);
 
+  mode_sub = glutCreateMenu(mode_menu);
+  glutAddMenuEntry("Filled", 12);
+  glutAddMenuEntry("Outlined", 13);
   
   glutCreateMenu(rightMenu);
   glutAddSubMenu("Color", color_sub);
+  glutAddSubMenu("Mode", mode_sub);
   glutAddSubMenu("Grid", grid_sub);
   glutAddMenuEntry("Clear",1);
   glutAddMenuEntry("Quit",2);

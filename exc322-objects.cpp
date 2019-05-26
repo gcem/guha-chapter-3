@@ -22,6 +22,7 @@ using namespace std;
 void Point::drawPoint(float size)
 {  
   glPointSize(size);
+  glColor3fv(color);
   glBegin(GL_POINTS);
   glVertex3f(x, y, 0.0);
   glEnd();   
@@ -30,6 +31,7 @@ void Point::drawPoint(float size)
 // Function to draw a line.
 void Line::drawLine()
 {
+  glColor3fv(color);
   glBegin(GL_LINES);
   glVertex3f(x1, y1, 0.0);
   glVertex3f(x2, y2, 0.0);
@@ -39,12 +41,14 @@ void Line::drawLine()
 // Function to draw a rectangle.
 void Rect::drawRectangle()
 {
+  glColor3fv(color);
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glRectf(x1, y1, x2, y2);
 }
 
 void Circle::draw(int vertexCount, float angle)
 {
+  glColor3fv(color);
   glBegin(GL_LINE_LOOP);
   for (int i = 0; i < vertexCount; i++)
     {
@@ -57,6 +61,7 @@ void Circle::draw(int vertexCount, float angle)
 
 void Text::drawText()
 {
+  glColor3fv(color);
   glPushMatrix();
   glTranslatef(x, y, 0.0);
   glScalef(scale, scale, 1.0);

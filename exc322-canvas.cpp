@@ -50,7 +50,7 @@ static int pointCount = 0; // Number of  specified points.
 static int tempX, tempY; // Co-ordinates of clicked point.
 static int isGrid = 1; // Is there grid?
 static int gridSize = 10;
-
+static float color[3] = {0, 0, 0};
 
 float Point::size = pointSize; // Set point size.
 
@@ -237,11 +237,12 @@ void drawTextSelectionIcon(void)
 {
   glColor3f(0.0, 0.0, 0.0);
   glPushMatrix();
-  glTranslatef(0.02*width, 0.915*height - height * TEXT / 10.0, 0.0);
-  glScalef(0.3 * width / 500, 0.3 * height / 500, 1.0);
-  glLineWidth(2);
-  glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, 'T');
-  glLineWidth(1);
+  glTranslatef(0.015*width, 0.915*height - height * TEXT / 10.0, 0.0);
+  glScalef(0.12 * width / 500, 0.33 * height / 500, 1.0);
+  glPointSize(1);
+  glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, 'a');
+  glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, 'b');
+  glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN, 'c');
   glPopMatrix();
   
   // glRasterPos3f(0.22*width, 0.915*height - height * TEXT / 10.0, 0.0);
@@ -390,8 +391,8 @@ void mouseControl(int button, int state, int x, int y)
 	{
 	  if (pointCount == 0)
 	    {
-	      if (primitive == POINT) points.push_back(Point(x,y));
-	      else
+	      if (primitive == POINT) points.push_back(Point(x,y, color));
+	      else if (primitive != INACTIVE)
 		{
 		  pointCount++;
 		  tempX = x;
@@ -399,22 +400,27 @@ void mouseControl(int button, int state, int x, int y)
 		  if (primitive == LINE || primitive == POLYLINE) 
 		    {	      
 		      currentLine = Line(x, y, x, y);
+		      currentLine.setColor(color);
 		    }
 		  else if (primitive == RECTANGLE) 
 		    {	
 		      currentRect = Rect(x, y, x, y);
+		      currentRect.setColor(color);
 		    }
 		  else if (primitive == CIRCLE)
 		    {
 		      currentCircle = Circle(x, y, 0);
+		      currentCircle.setColor(color);
 		    }
 		  else if (primitive == HEXAGON)
 		    {
 		      currentHexagon = Hexagon(x, y, x, y);
+		      currentHexagon.setColor(color);
 		    }
 		  else if (primitive == TEXT)
 		    {
 		      currentText = Text(x, y, 0.3);
+		      currentText.setColor(color);
 		    }
 		}
 	    }
@@ -550,7 +556,26 @@ void grid_menu(int id)
   glutPostRedisplay();
 }
 
-void grid_size(int id)
+void color_menu(int id)
+{
+  switch (id)
+    {
+    case 8:
+      color[0] = 0.0; color[1] = 0.0; color[2] = 0.0;
+      break;
+    case 9:
+      color[0] = 1.0; color[1] = 0.0; color[2] = 0.0;
+      break;
+    case 10:
+      color[0] = 0.0; color[1] = 0.7; color[2] = 0.0;
+      break;
+    case 11:
+      color[0] = 0.0; color[1] = 0.0; color[2] = 1.0;
+      break;
+    }
+}
+
+void grid_size_menu(int id)
 {
   switch (id)
     {
@@ -569,19 +594,27 @@ void grid_size(int id)
 // Function to create menu.
 void makeMenu(void)
 {
-  int sub_menu, size_menu;
-  size_menu = glutCreateMenu(grid_size);
+  int grid_sub, size_sub, color_sub;
+  size_sub = glutCreateMenu(grid_size_menu);
   glutAddMenuEntry("Small", 5);
   glutAddMenuEntry("Medium", 6);
   glutAddMenuEntry("Large", 7);
   
-  sub_menu = glutCreateMenu(grid_menu);
+  grid_sub = glutCreateMenu(grid_menu);
   glutAddMenuEntry("On", 3);
   glutAddMenuEntry("Off",4);
-  glutAddSubMenu("Size", size_menu);
+  glutAddSubMenu("Size", size_sub);
 
+  color_sub = glutCreateMenu(color_menu);
+  glutAddMenuEntry("Black", 8);
+  glutAddMenuEntry("Red", 9);
+  glutAddMenuEntry("Green", 10);
+  glutAddMenuEntry("Blue", 11);
+
+  
   glutCreateMenu(rightMenu);
-  glutAddSubMenu("Grid", sub_menu);
+  glutAddSubMenu("Color", color_sub);
+  glutAddSubMenu("Grid", grid_sub);
   glutAddMenuEntry("Clear",1);
   glutAddMenuEntry("Quit",2);
   glutAttachMenu(GLUT_RIGHT_BUTTON);

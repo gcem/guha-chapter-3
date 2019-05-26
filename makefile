@@ -11,7 +11,7 @@ exc322-canvas: $(objects322)
 $(targets): 
 	$(CXX)  -o $@ $^ $(CPPFLAGS) $(CXXFLAGS) 
 
-%.o:
+%.o:%.cpp
 	$(CXX) $*.cpp $(CPPFLAGS) $(CXXFLAGS) -c
 
 %:

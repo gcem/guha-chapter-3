@@ -5,5 +5,9 @@
 # do not ignore directories
 !*/
 
+!makefile
+*.o
+
 # ignore emacs autosave files (#filename#)
 \#*\#
+

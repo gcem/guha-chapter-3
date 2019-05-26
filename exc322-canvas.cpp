@@ -49,6 +49,7 @@ static int primitive = INACTIVE; // Current drawing primitive.
 static int pointCount = 0; // Number of  specified points.
 static int tempX, tempY; // Co-ordinates of clicked point.
 static int isGrid = 1; // Is there grid?
+static int gridSize = 10;
 
 
 float Point::size = pointSize; // Set point size.
@@ -281,15 +282,15 @@ void drawGrid(void)
   glColor3f(0.75, 0.75, 0.75);
 
   glBegin(GL_LINES);
-  for (i=2; i <=9; i++)
+  for (i=1; i < gridSize; i++)
     {
-      glVertex3f(i*0.1*width, 0.0, 0.0);
-      glVertex3f(i*0.1*width, height, 0.0);
+      glVertex3f(width * (0.1 + i * 0.9 / gridSize), 0.0, 0.0);
+      glVertex3f(width * (0.1 + i * 0.9 / gridSize), height, 0.0);
     }
-  for (i=1; i <=9; i++)
+  for (i=1; i < gridSize; i++)
     {
-      glVertex3f(0.1*width, i*0.1*height, 0.0);
-      glVertex3f(width, i*0.1*height, 0.0);
+      glVertex3f(0.1*width, i*height / (float) gridSize, 0.0);
+      glVertex3f(width, i*height / (float) gridSize, 0.0);
     }
   glEnd();
   glDisable(GL_LINE_STIPPLE);
@@ -549,13 +550,35 @@ void grid_menu(int id)
   glutPostRedisplay();
 }
 
+void grid_size(int id)
+{
+  switch (id)
+    {
+    case 5:
+      gridSize = 15;
+      break;
+    case 6:
+      gridSize = 10;
+      break;
+    case 7:
+      gridSize = 5;
+      break;
+    }
+}
+
 // Function to create menu.
 void makeMenu(void)
 {
-  int sub_menu;
+  int sub_menu, size_menu;
+  size_menu = glutCreateMenu(grid_size);
+  glutAddMenuEntry("Small", 5);
+  glutAddMenuEntry("Medium", 6);
+  glutAddMenuEntry("Large", 7);
+  
   sub_menu = glutCreateMenu(grid_menu);
   glutAddMenuEntry("On", 3);
   glutAddMenuEntry("Off",4);
+  glutAddSubMenu("Size", size_menu);
 
   glutCreateMenu(rightMenu);
   glutAddSubMenu("Grid", sub_menu);

@@ -16,7 +16,6 @@
 
 #include "exc322-objects.h"
 #define PI 3.14159265358979324
-#define CIRCLE_VERTICES 30
 
 using namespace std;
 // Function to draw a point.
@@ -44,16 +43,20 @@ void Rect::drawRectangle()
   glRectf(x1, y1, x2, y2);
 }
 
-void Circle::drawCircle()
+void Circle::draw(int vertexCount, float angle)
 {
-  float angle;
   glBegin(GL_LINE_LOOP);
-  for (int i = 0; i < CIRCLE_VERTICES; i++)
+  for (int i = 0; i < vertexCount; i++)
     {
-      angle = 2 * PI * i / CIRCLE_VERTICES;
+      angle += 2 * PI / vertexCount;
       glVertex3f(x + r * cos(angle), y + r * sin(angle), 0.0);
       cout << y + r * sin(angle) << endl;
     }
   glEnd();
+}
 
+Hexagon::Hexagon(float x, float y, float vertexX, float vertexY)
+  : Circle(x, y, sqrt((x-vertexX) * (x - vertexX) + (y - vertexY) * (y - vertexY)))
+{
+  angle = atan((y - vertexY) / (x-vertexX));
 }

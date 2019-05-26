@@ -35,7 +35,8 @@ using namespace std;
 #define POLYLINE 2
 #define RECTANGLE 3
 #define CIRCLE 4
-#define NUMBERPRIMITIVES 5
+#define HEXAGON 5
+#define NUMBERPRIMITIVES 6
 
 // Use the STL extension of C++.
 using namespace std;
@@ -56,57 +57,78 @@ vector<Point> points;
 vector<Line> lines;
 vector<Rect> rectangles;
 vector<Circle> circles;
-
-// Iterators to traverse primitive arrays
-vector<Point>::iterator pointsIterator; 
-vector<Line>::iterator linesIterator;
-vector<Rect>::iterator rectanglesIterator;
-vector<Circle>::iterator circlesIterator;
+vector<Hexagon> hexagons;
 
 // Function to draw all points in the points array.
 void drawPoints(void)
 {
+  vector<Point>::iterator iter;
+  vector<Point>::const_iterator end; 
   // Loop through the points array drawing each point.
-  pointsIterator = points.begin();
-  while(pointsIterator != points.end() )
+  iter = points.begin();
+  end = points.end();
+  while(iter != points.end() )
     {
-      pointsIterator->drawPoint(pointSize);
-      pointsIterator++;
+      iter->drawPoint(pointSize);
+      iter++;
     }
 }
 
 // Function to draw all lines in the lines array.
 void drawLines(void)
 {
+  vector<Line>::iterator iter;
+  vector<Line>::const_iterator end; 
   // Loop through the lines array drawing each line.
-  linesIterator = lines.begin();
-  while(linesIterator != lines.end() )
+  iter = lines.begin();
+  end = lines.end();
+  while(iter != end)
     {
-      linesIterator->drawLine();
-      linesIterator++;
+      iter->drawLine();
+      iter++;
     }
 }
 
 // draw circles
 void drawCircles()
 {
-  circlesIterator = circles.begin();
-  while (circlesIterator != circles.end())
+  vector<Circle>::iterator iter;
+  vector<Circle>::const_iterator end; 
+  iter = circles.begin();
+end = circles.end();
+  while (iter != circles.end())
     {
-      circlesIterator->drawCircle();
-      circlesIterator++;
+      iter->drawCircle();
+      iter++;
+    }
+}
+
+void drawHexagons()
+{
+  vector<Hexagon>::iterator iter;
+  vector<Hexagon>::const_iterator end; 
+  iter = hexagons.begin();
+  end = hexagons.end();
+  while (iter != hexagons.end())
+    {
+      iter->drawHexagon();
+      iter++;
     }
 }
 
 // Function to draw all rectangles in the rectangles array.
 void drawRectangles(void)
 {
+  vector<Rect>::iterator iter;
+  vector<Rect>::const_iterator end; 
   // Loop through the rectangles array drawing each rectangle.
-  rectanglesIterator = rectangles.begin();
-  while(rectanglesIterator != rectangles.end() )
+  iter = rectangles.begin();
+  end = rectangles.end();
+  
+  while(iter != end)
     {
-      rectanglesIterator->drawRectangle();
-      rectanglesIterator++;
+      iter->drawRectangle();
+      iter++;
     }
 }
 
@@ -232,7 +254,9 @@ void drawScene(void)
   glClear(GL_COLOR_BUFFER_BIT);
   glColor3f(0.0, 0.0, 0.0); 
 
-  drawCircles(); // this should be at the beginning, otherwise it draws over selection boxes
+  // these should be at the beginning, otherwise they draw over selection boxes
+  drawCircles(); 
+  drawHexagons();
   
   drawSelectionBoxes();
   drawPointSelectionIcon();
@@ -311,6 +335,11 @@ void mouseControl(int button, int state, int x, int y)
 	      else if (primitive == CIRCLE)
 		{
 		  circles.push_back(Circle(tempX, tempY, sqrt((x-tempX) * (x - tempX) + (y - tempY) * (y - tempY))));
+		  pointCount = 0;
+		}
+	      else if (primitive == HEXAGON)
+		{
+		  hexagons.push_back(Hexagon(tempX, tempY, x, y));
 		  pointCount = 0;
 		}
 	    }

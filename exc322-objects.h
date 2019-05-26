@@ -1,6 +1,8 @@
 #ifndef H_E322_OBJECTS
 #define H_E322_OBJECTS
 
+#define CIRCLE_VERTICES 40
+
 // Point class.
 class Point
 {
@@ -45,11 +47,21 @@ class Circle
 {
  public:
   Circle(float x, float y, float r)
-    : x { x }, y { y }, r { r } {}
-  void drawCircle();
+    : x { x }, y { y }, r { r } { }
+  void drawCircle() { draw(CIRCLE_VERTICES, 0.0);}
   
- private:
+ protected:
   float x, y, r;
+  void draw(int vertexCount, float angle);
+};
+
+class Hexagon : public Circle
+{
+ public:
+  Hexagon(float x, float y, float vertexX, float vertexY);
+  void drawHexagon() { draw(6, angle);}
+ private:
+  float angle;
 };
 
 #endif

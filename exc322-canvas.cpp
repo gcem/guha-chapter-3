@@ -204,7 +204,14 @@ void drawRectangleSelectionIcon(void)
 void drawCircleSelectionIcon(void)
 {
   glColor3f(0.0, 0.0, 0.0);
-  Circle(0.05*width, 0.95*height - height * CIRCLE / 10.0, 0.03 * width).drawCircle();
+  Circle(0.05*width, 0.95*height - height * CIRCLE / 10.0, 0.035 * min(width, height)).drawCircle();
+}
+
+void drawHexagonSelectionIcon(void)
+{
+  glColor3f(0.0, 0.0, 0.0);
+  Hexagon(0.05*width, 0.95*height - height * HEXAGON / 10.0,
+	  0.05*width + 0.035 * min(width, height), 0.95*height - height * HEXAGON / 10.0).drawHexagon();
 }
 
 // Function to draw unused part of left selection area.
@@ -290,6 +297,7 @@ void drawScene(void)
   drawPolyLineSelectionIcon();
   drawRectangleSelectionIcon();
   drawCircleSelectionIcon();
+  drawHexagonSelectionIcon();
   drawInactiveArea();
 
   drawPoints();

@@ -54,9 +54,3 @@ void Circle::draw(int vertexCount, float angle)
     }
   glEnd();
 }
-
-Hexagon::Hexagon(float x, float y, float vertexX, float vertexY)
-  : Circle(x, y, sqrt((x-vertexX) * (x - vertexX) + (y - vertexY) * (y - vertexY)))
-{
-  angle = atan((y - vertexY) / (x-vertexX));
-}

@@ -39,6 +39,10 @@ using namespace std;
 #define TEXT 6
 #define NUMBERPRIMITIVES 7
 
+#define SMALLGRID 15
+#define MEDIUMGRID 10
+#define LARGEGRID 5
+
 #define GRIDARRAY 0
 #define VERTEXBUF 0
 
@@ -58,7 +62,6 @@ static float colors[NUMBERPRIMITIVES][3] = {0};
 static int mouseOnPrimitive = INACTIVE;
 static unsigned int vao[1];
 static unsigned int buffers[1];
-static float *vertexArray;
 
 int grid_sub, size_sub, color_sub, mode_sub; // menu ids
 int menuState = 0;
@@ -299,8 +302,8 @@ void drawGrid(void)
   glLineStipple(1, 0x5555);
   glColor3f(0.5, 0.5, 0.5);
 
-  
-  glVertexPointer(3, GL_FLOAT, 0, vertexArray);
+  glBindVertexArray(vao[GRIDARRAY]);
+  // glVertexPointer(3, GL_FLOAT, 0, vertexArray);
   glDrawArrays(GL_LINES, 0, gridSize * 4);
   glFlush();
   
@@ -567,7 +570,7 @@ void mouseMotion(int x, int y)
 void updateGridArray()
 {
   // calculate vertices
-  vertexArray = new float[gridSize * 12];
+  float *vertexArray = new float[gridSize * 12];
   for (int i = 0; i < gridSize; i++)
     {
       // vertical
@@ -588,8 +591,7 @@ void updateGridArray()
   
   // setup vertex array
   glBindVertexArray(vao[GRIDARRAY]);
-  
-  glBufferSubData(GL_ARRAY_BUFFER, 0, gridSize * 12 * sizeof(float), vertexArray);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, gridSize * 12 * sizeof(float), vertexArray);    
 }
 
 // OpenGL window reshape routine.
@@ -670,28 +672,26 @@ void color_menu(int id)
     case 8:
       colors[mouseOnPrimitive][0] = 0.0;
       colors[mouseOnPrimitive][1] = 0.0;
-      colors[mouseOnPrimitive][2] = 0.0;
-      
+      colors[mouseOnPrimitive][2] = 0.0;      
       break;
     case 9:
       colors[mouseOnPrimitive][0] = 1.0;
       colors[mouseOnPrimitive][1] = 0.0;
-      colors[mouseOnPrimitive][2] = 0.0;
-      
+      colors[mouseOnPrimitive][2] = 0.0;      
       break;
     case 10:
       colors[mouseOnPrimitive][0] = 0.0;
       colors[mouseOnPrimitive][1] = 0.7;
-      colors[mouseOnPrimitive][2] = 0.0;
-      
+      colors[mouseOnPrimitive][2] = 0.0;      
       break;
     case 11:
       colors[mouseOnPrimitive][0] = 0.0;
       colors[mouseOnPrimitive][1] = 0.0;
-      colors[mouseOnPrimitive][2] = 1.0;
-      
+      colors[mouseOnPrimitive][2] = 1.0;      
       break;
     }
+  primitive = mouseOnPrimitive;
+  glutPostRedisplay();
 }
 
 void grid_size_menu(int id)
@@ -699,13 +699,13 @@ void grid_size_menu(int id)
   switch (id)
     {
     case 5:
-      gridSize = 15;
+      gridSize = SMALLGRID;
       break;
     case 6:
-      gridSize = 10;
+      gridSize = MEDIUMGRID;
       break;
     case 7:
-      gridSize = 5;
+      gridSize = LARGEGRID;
       break;
     }
   updateGridArray();
@@ -723,6 +723,8 @@ void mode_menu(int id)
       isFilled[mouseOnPrimitive] = 0;
       break;
     }
+  primitive = mouseOnPrimitive;
+  glutPostRedisplay();
 }
 
 // Function to create menu.
@@ -762,15 +764,18 @@ void setup(void)
 
   makeMenu(); // Create menu.
 
-  // glGenVertexArrays(1, vao);
-  // glGenBuffers(1, buffers);
+  // setup vao
+  glGenVertexArrays(1, vao);
+  glBindVertexArray(vao[GRIDARRAY]);
+  glGenBuffers(1, buffers);
 
   glEnableClientState(GL_VERTEX_ARRAY);
 
-  // glBindBuffer(GL_ARRAY_BUFFER, buffers[VERTEXBUF]);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers[VERTEXBUF]);
+  glVertexPointer(3, GL_FLOAT, 0, 0);
 
-  // glVertexPointer(3, GL_FLOAT, 0, 0);
-  // glBufferData(GL_ARRAY_BUFFER, 15 * 12 * sizeof(float), NULL, GL_STATIC_DRAW);  
+  glBufferData(GL_ARRAY_BUFFER, SMALLGRID * 12 * sizeof(float), NULL, GL_STATIC_DRAW);
+    
   updateGridArray();
 }
 

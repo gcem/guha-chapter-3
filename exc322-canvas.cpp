@@ -39,11 +39,14 @@ using namespace std;
 #define TEXT 6
 #define NUMBERPRIMITIVES 7
 
+#define GRIDARRAY 0
+#define VERTEXBUF 0
+
 // Use the STL extension of C++.
 using namespace std;
 
 // Globals.
-static int width, height; // OpenGL window size.
+static int width = 500, height = 500; // OpenGL window size.
 static float pointSize = 3.0; // Size of point
 static int primitive = INACTIVE; // Current drawing primitive.
 static int pointCount = 0; // Number of  specified points.
@@ -53,6 +56,9 @@ static int isFilled[NUMBERPRIMITIVES] = {0};
 static int gridSize = 10;
 static float colors[NUMBERPRIMITIVES][3] = {0};
 static int mouseOnPrimitive = INACTIVE;
+static unsigned int vao[1];
+static unsigned int buffers[1];
+static float *vertexArray;
 
 int grid_sub, size_sub, color_sub, mode_sub; // menu ids
 int menuState = 0;
@@ -289,24 +295,18 @@ void drawTempPoint(void)
 // Function to draw a grid.
 void drawGrid(void)
 {
-  int i;
-   
   glEnable(GL_LINE_STIPPLE);
-  glLineStipple(1, 0x5555); 
-  glColor3f(0.75, 0.75, 0.75);
+  glLineStipple(1, 0x5555);
+  glColor3f(0.5, 0.5, 0.5);
 
-  glBegin(GL_LINES);
-  for (i=1; i < gridSize; i++)
-    {
-      glVertex3f(width * (0.1 + i * 0.9 / gridSize), 0.0, 0.0);
-      glVertex3f(width * (0.1 + i * 0.9 / gridSize), height, 0.0);
-    }
-  for (i=1; i < gridSize; i++)
-    {
-      glVertex3f(0.1*width, i*height / (float) gridSize, 0.0);
-      glVertex3f(width, i*height / (float) gridSize, 0.0);
-    }
-  glEnd();
+  
+  glVertexPointer(3, GL_FLOAT, 0, vertexArray);
+  glDrawArrays(GL_LINES, 0, gridSize * 4);
+  glFlush();
+  
+  // glBindVertexArray(vao[GRIDARRAY]);
+  // glDrawArrays(GL_LINES, 0, gridSize * 4);
+  
   glDisable(GL_LINE_STIPPLE);
 }
 
@@ -362,7 +362,7 @@ void drawScene(void)
   
   if(pointCount) drawTempPoint();
   if (isGrid) drawGrid();
-
+  
   glutSwapBuffers();
 }
 
@@ -564,6 +564,34 @@ void mouseMotion(int x, int y)
   updateMenus(x, y);  
 }
 
+void updateGridArray()
+{
+  // calculate vertices
+  vertexArray = new float[gridSize * 12];
+  for (int i = 0; i < gridSize; i++)
+    {
+      // vertical
+      vertexArray[6 * i] = vertexArray[6 * i + 3] = width * (0.1 + i * 0.9 / gridSize);
+      vertexArray[6 * i + 1] = 0.0;
+      vertexArray[6 * i + 4] = height;
+      // horizontal
+      vertexArray[6*(i+gridSize)+1] = vertexArray[6*(i+gridSize)+4] = i*height / (float) gridSize;
+      vertexArray[6*(i+gridSize)] = 0.1*width;
+      vertexArray[6*(i+gridSize)+3] = width;
+      
+      // depth is 0 for all vertices
+      vertexArray[6*i+2] = vertexArray[6*i+5] =
+	vertexArray[6*(i+gridSize)+2] = vertexArray[6*(i+gridSize)+5] = 0.0;
+      cout << vertexArray[6*i] << ", " << vertexArray[6*i + 1] << ", " << vertexArray[6*i + 2] << endl;
+      cout << vertexArray[6*i+3] << ", " << vertexArray[6*i + 4] << ", " << vertexArray[6*i + 5] << endl;
+    }
+  
+  // setup vertex array
+  glBindVertexArray(vao[GRIDARRAY]);
+  
+  glBufferSubData(GL_ARRAY_BUFFER, 0, gridSize * 12 * sizeof(float), vertexArray);
+}
+
 // OpenGL window reshape routine.
 void resize(int w, int h)
 {
@@ -578,6 +606,8 @@ void resize(int w, int h)
   width = w; 
   height = h;  
 
+  updateGridArray();
+  
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 }
@@ -678,6 +708,8 @@ void grid_size_menu(int id)
       gridSize = 5;
       break;
     }
+  updateGridArray();
+  glutPostRedisplay();
 }
 
 void mode_menu(int id)
@@ -729,6 +761,17 @@ void setup(void)
   glClearColor(1.0, 1.0, 1.0, 0.0); 
 
   makeMenu(); // Create menu.
+
+  // glGenVertexArrays(1, vao);
+  // glGenBuffers(1, buffers);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+
+  // glBindBuffer(GL_ARRAY_BUFFER, buffers[VERTEXBUF]);
+
+  // glVertexPointer(3, GL_FLOAT, 0, 0);
+  // glBufferData(GL_ARRAY_BUFFER, 15 * 12 * sizeof(float), NULL, GL_STATIC_DRAW);  
+  updateGridArray();
 }
 
 // Routine to output interaction instructions to the C++ window.
@@ -758,6 +801,8 @@ int main(int argc, char **argv)
   glutKeyboardFunc(keyInput);
   glutMouseFunc(mouseControl);
   glutPassiveMotionFunc(mouseMotion);
+
+  
 
   glewExperimental = GL_TRUE;
   glewInit();

@@ -49,9 +49,15 @@ static int primitive = INACTIVE; // Current drawing primitive.
 static int pointCount = 0; // Number of  specified points.
 static int tempX, tempY; // Co-ordinates of clicked point.
 static int isGrid = 1; // Is there grid?
-static int isFilled = 0;
+static int isFilled[NUMBERPRIMITIVES] = {0};
 static int gridSize = 10;
-static float color[3] = {0, 0, 0};
+static float colors[NUMBERPRIMITIVES][3] = {0};
+static int mouseOnPrimitive = INACTIVE;
+
+int grid_sub, size_sub, color_sub, mode_sub; // menu ids
+int menuState = 0;
+void rightMenu(int);
+
 
 float Point::size = pointSize; // Set point size.
 
@@ -181,7 +187,7 @@ void drawPointSelectionIcon(void)
 {  
   // Draw point icon.
   glPointSize(pointSize);
-  glColor3f(0.0, 0.0, 0.0);
+  glColor3fv(colors[POINT]);
   glBegin(GL_POINTS);
   glVertex3f(0.05*width, 0.95*height - height * POINT / 10.0, 0.0);
   glEnd();  
@@ -191,7 +197,7 @@ void drawPointSelectionIcon(void)
 void drawLineSelectionIcon(void)
 {  
   // Draw line icon.
-  glColor3f(0.0, 0.0, 0.0);
+  glColor3fv(colors[LINE]);
   glBegin(GL_LINES);
   glVertex3f(0.025*width, 0.925*height - height * LINE / 10.0, 0.0);
   glVertex3f(0.075*width, 0.975*height - height * LINE / 10.0, 0.0);
@@ -200,7 +206,7 @@ void drawLineSelectionIcon(void)
 
 void drawPolyLineSelectionIcon()
 {
-  glColor3f(0.0, 0.0, 0.0);
+  glColor3fv(colors[POLYLINE]);
   glBegin(GL_LINE_STRIP);
   glVertex3f(0.02*width, 0.925*height - height * POLYLINE / 10.0, 0.0);
   glVertex3f(0.045*width, 0.975*height - height * POLYLINE / 10.0, 0.0);
@@ -213,8 +219,8 @@ void drawPolyLineSelectionIcon()
 void drawRectangleSelectionIcon(void)
 {  
   // Draw rectangle icon.
-  glColor3f(0.0, 0.0, 0.0);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glColor3fv(colors[RECTANGLE]);
+  glPolygonMode(GL_FRONT_AND_BACK, isFilled[RECTANGLE] ? GL_FILL : GL_LINE);
   glRectf(0.025*width,
 	  0.935*height - height * RECTANGLE / 10.0, 0.075*width,
 	  0.965*height - height * RECTANGLE / 10.0);
@@ -223,20 +229,26 @@ void drawRectangleSelectionIcon(void)
 
 void drawCircleSelectionIcon(void)
 {
-  glColor3f(0.0, 0.0, 0.0);
-  Circle(0.05*width, 0.95*height - height * CIRCLE / 10.0, 0.035 * min(width, height)).drawCircle();
+  Circle icon =
+    Circle(0.05*width, 0.95*height - height * CIRCLE / 10.0, 0.035 * min(width, height));
+  icon.setColor(colors[CIRCLE]);
+  icon.setMode(isFilled[CIRCLE]);
+  icon.drawCircle();
 }
 
 void drawHexagonSelectionIcon(void)
 {
-  glColor3f(0.0, 0.0, 0.0);
-  Hexagon(0.05*width, 0.95*height - height * HEXAGON / 10.0,
-	  0.05*width + 0.035 * min(width, height), 0.95*height - height * HEXAGON / 10.0).drawHexagon();
+  Hexagon icon =
+    Hexagon(0.05*width, 0.95*height - height * HEXAGON / 10.0,
+	    0.05*width + 0.035 * min(width, height), 0.95*height - height * HEXAGON / 10.0);
+  icon.setColor(colors[HEXAGON]);
+  icon.setMode(isFilled[HEXAGON]);
+  icon.drawHexagon();
 }
 
 void drawTextSelectionIcon(void)
 {
-  glColor3f(0.0, 0.0, 0.0);
+  glColor3fv(colors[TEXT]);
   glPushMatrix();
   glTranslatef(0.015*width, 0.915*height - height * TEXT / 10.0, 0.0);
   glScalef(0.12 * width / 500, 0.33 * height / 500, 1.0);
@@ -267,7 +279,7 @@ void drawInactiveArea(void)
 // Function to draw temporary point.
 void drawTempPoint(void)
 {
-  glColor3f(1.0, 0.0, 0.0);
+  glColor3f(0.5, 0.0, 1.0);
   glPointSize(pointSize);
   glBegin(GL_POINTS);
   glVertex3f(tempX, tempY, 0.0);
@@ -362,13 +374,72 @@ void pickPrimitive(int y)
   else primitive = primitiveIndex;
 }
 
+
+void updateMenus(int x, int y)
+{
+  if (x < 0.1*width)
+    {
+      mouseOnPrimitive = 10.0 * (height - y) / height;
+      if (mouseOnPrimitive == RECTANGLE || mouseOnPrimitive == CIRCLE || mouseOnPrimitive == HEXAGON)
+	{
+	  if (menuState != 2)
+	    {
+
+	      glutCreateMenu(rightMenu);
+	      glutAddSubMenu("Color", color_sub);
+	      glutAddSubMenu("Mode", mode_sub);
+	      glutAddSubMenu("Grid", grid_sub);
+	      glutAddMenuEntry("Clear",1);
+	      glutAddMenuEntry("Quit",2);
+	      glutAttachMenu(GLUT_RIGHT_BUTTON);
+	      menuState = 2;
+	    }
+	}
+      else if (mouseOnPrimitive < NUMBERPRIMITIVES)
+	{
+	  if (menuState != 1)
+	    {
+
+	      glutCreateMenu(rightMenu);
+	      glutAddSubMenu("Color", color_sub);
+	      glutAddSubMenu("Grid", grid_sub);
+	      glutAddMenuEntry("Clear",1);
+	      glutAddMenuEntry("Quit",2);
+	      glutAttachMenu(GLUT_RIGHT_BUTTON);
+	      menuState = 1;
+	    }
+	}
+      else if (menuState != 0)
+	{
+	  mouseOnPrimitive = INACTIVE;
+	  glutCreateMenu(rightMenu);
+	  glutAddSubMenu("Grid", grid_sub);
+	  glutAddMenuEntry("Clear",1);
+	  glutAddMenuEntry("Quit",2);
+	  glutAttachMenu(GLUT_RIGHT_BUTTON);
+	  menuState = 0;		  
+	}
+    }
+  else if (menuState != 0)
+    {
+      mouseOnPrimitive = INACTIVE;
+      menuState = 0;
+      glutCreateMenu(rightMenu);
+      glutAddSubMenu("Grid", grid_sub);
+      glutAddMenuEntry("Clear",1);
+      glutAddMenuEntry("Quit",2);
+      glutAttachMenu(GLUT_RIGHT_BUTTON);
+    }
+}
+
+
+
 // The mouse callback routine.
 void mouseControl(int button, int state, int x, int y)
 {
+  y = height - y; // Correct from mouse to OpenGL co-ordinates.
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
-      y = height - y; // Correct from mouse to OpenGL co-ordinates.
-
       if (primitive == TEXT)
 	{
 	  texts.push_back(currentText);
@@ -390,7 +461,7 @@ void mouseControl(int button, int state, int x, int y)
 	{
 	  if (pointCount == 0)
 	    {
-	      if (primitive == POINT) points.push_back(Point(x,y, color));
+	      if (primitive == POINT) points.push_back(Point(x,y, colors[primitive]));
 	      else if (primitive != INACTIVE)
 		{
 		  pointCount++;
@@ -399,30 +470,30 @@ void mouseControl(int button, int state, int x, int y)
 		  if (primitive == LINE || primitive == POLYLINE) 
 		    {	      
 		      currentLine = Line(x, y, x, y);
-		      currentLine.setColor(color);
+		      currentLine.setColor(colors[primitive]);
 		    }
 		  else if (primitive == RECTANGLE) 
 		    {	
 		      currentRect = Rect(x, y, x, y);
-		      currentRect.setColor(color);
-		      currentRect.setMode(isFilled);
+		      currentRect.setColor(colors[primitive]);
+		      currentRect.setMode(isFilled[primitive]);
 		    }
 		  else if (primitive == CIRCLE)
 		    {
 		      currentCircle = Circle(x, y, 0);
-		      currentCircle.setColor(color);
-		      currentCircle.setMode(isFilled);
+		      currentCircle.setColor(colors[primitive]);
+		      currentCircle.setMode(isFilled[primitive]);
 		    }
 		  else if (primitive == HEXAGON)
 		    {
 		      currentHexagon = Hexagon(x, y, x, y);
-		      currentHexagon.setColor(color);
-		      currentHexagon.setMode(isFilled);
+		      currentHexagon.setColor(colors[primitive]);
+		      currentHexagon.setMode(isFilled[primitive]);
 		    }
 		  else if (primitive == TEXT)
 		    {
 		      currentText = Text(x, y, 0.3);
-		      currentText.setColor(color);
+		      currentText.setColor(colors[primitive]);
 		    }
 		}
 	    }
@@ -460,6 +531,9 @@ void mouseControl(int button, int state, int x, int y)
     {
       pointCount = 0;
     }
+  
+  updateMenus(x, y);
+  
   glutPostRedisplay();
 }
 
@@ -485,8 +559,9 @@ void mouseMotion(int x, int y)
 	{
 	  currentHexagon.setEnd(x, y);
 	}
+      glutPostRedisplay();
     }
-  glutPostRedisplay();
+  updateMenus(x, y);  
 }
 
 // OpenGL window reshape routine.
@@ -563,16 +638,28 @@ void color_menu(int id)
   switch (id)
     {
     case 8:
-      color[0] = 0.0; color[1] = 0.0; color[2] = 0.0;
+      colors[mouseOnPrimitive][0] = 0.0;
+      colors[mouseOnPrimitive][1] = 0.0;
+      colors[mouseOnPrimitive][2] = 0.0;
+      
       break;
     case 9:
-      color[0] = 1.0; color[1] = 0.0; color[2] = 0.0;
+      colors[mouseOnPrimitive][0] = 1.0;
+      colors[mouseOnPrimitive][1] = 0.0;
+      colors[mouseOnPrimitive][2] = 0.0;
+      
       break;
     case 10:
-      color[0] = 0.0; color[1] = 0.7; color[2] = 0.0;
+      colors[mouseOnPrimitive][0] = 0.0;
+      colors[mouseOnPrimitive][1] = 0.7;
+      colors[mouseOnPrimitive][2] = 0.0;
+      
       break;
     case 11:
-      color[0] = 0.0; color[1] = 0.0; color[2] = 1.0;
+      colors[mouseOnPrimitive][0] = 0.0;
+      colors[mouseOnPrimitive][1] = 0.0;
+      colors[mouseOnPrimitive][2] = 1.0;
+      
       break;
     }
 }
@@ -598,10 +685,10 @@ void mode_menu(int id)
   switch (id)
     {
     case 12:
-      isFilled = 1;
+      isFilled[mouseOnPrimitive] = 1;
       break;
     case 13:
-      isFilled = 0;
+      isFilled[mouseOnPrimitive] = 0;
       break;
     }
 }
@@ -609,7 +696,6 @@ void mode_menu(int id)
 // Function to create menu.
 void makeMenu(void)
 {
-  int grid_sub, size_sub, color_sub, mode_sub;
   size_sub = glutCreateMenu(grid_size_menu);
   glutAddMenuEntry("Small", 5);
   glutAddMenuEntry("Medium", 6);
@@ -629,10 +715,8 @@ void makeMenu(void)
   mode_sub = glutCreateMenu(mode_menu);
   glutAddMenuEntry("Filled", 12);
   glutAddMenuEntry("Outlined", 13);
-  
+
   glutCreateMenu(rightMenu);
-  glutAddSubMenu("Color", color_sub);
-  glutAddSubMenu("Mode", mode_sub);
   glutAddSubMenu("Grid", grid_sub);
   glutAddMenuEntry("Clear",1);
   glutAddMenuEntry("Quit",2);

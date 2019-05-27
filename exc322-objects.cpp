@@ -65,13 +65,13 @@ void Circle::draw(int vertexCount, float angle)
     {
       angle += 2 * PI / vertexCount;
       glVertex3f(x + r * cos(angle), y + r * sin(angle), 0.0);
-      cout << y + r * sin(angle) << endl;
     }
   glEnd();
 }
 
 void Text::drawText()
 {
+  glPointSize(1);
   glColor3fv(color);
   glPushMatrix();
   glTranslatef(x, y, 0.0);

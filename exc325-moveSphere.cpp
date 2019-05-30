@@ -1,7 +1,5 @@
-///////////////////////////////////////////////////////////////
-// moveSphere.cpp
 //
-// This program allows the user to move a sphere to demonstrate
+// This program allows the user to move a hemisphere to demonstrate
 // distortion at the edges of the viewing frustum.
 //
 // Interaction:
@@ -9,8 +7,7 @@
 // Press the space bar to rotate the sphere..
 // Press r to reset.
 //
-// Sumanta Guha.
-///////////////////////////////////////////////////////////////
+
 
 #include <iostream>
 
@@ -30,10 +27,14 @@ using namespace std;
 // Globals.
 static float Xvalue = 0.0, Yvalue = 0.0; // Co-ordinates of the sphere.
 static float Angle = 0.0; // Angle to rotate the sphere.
+static float height = 0.0; // y-coordinate of the clipping plane
 
 // Drawing routine.
 void drawScene(void)
 {
+  double equation[] = {0.0, 1.0, 0.0, height};
+  glClipPlane(GL_CLIP_PLANE0, equation);
+  glEnable(GL_CLIP_PLANE0);
    glClear(GL_COLOR_BUFFER_BIT);
 
    glLoadIdentity();

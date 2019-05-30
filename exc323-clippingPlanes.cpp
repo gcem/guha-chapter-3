@@ -67,8 +67,8 @@ void drawScene(void)
 {  
    float angle;
    int i;
-   double eqn0[4] = {0.0, 0.0, -1.0, 0.25}; // Data for clipping plane 0.
-   double eqn1[4] = {1.0, 0.5, 0.0, -60.0}; // Data for clipping plane 1.
+   double eqn0[4] = {0.0, 0.003, -1.0, -0.16}; // Data for clipping plane 0.
+   double eqn1[4] = {1.0, 0.5, 0.0, -90.0}; // Data for clipping plane 1.
 
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    

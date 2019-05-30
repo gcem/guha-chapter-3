@@ -5,6 +5,7 @@
 // Interaction:
 // Press the arrow keys to move the sphere.
 // Press the space bar to rotate the sphere..
+// Press +/- to change the y-coordinate of the clipping plane
 // Press r to reset.
 //
 
@@ -32,21 +33,23 @@ static float height = 0.0; // y-coordinate of the clipping plane
 // Drawing routine.
 void drawScene(void)
 {
-  double equation[] = {0.0, 1.0, 0.0, height};
-  glClipPlane(GL_CLIP_PLANE0, equation);
+  double equation[] = {0.0, 1.0, 0.0, -height};  
+
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  glLoadIdentity();
+
+  // Set the position of the sphere.
+  glTranslatef(Xvalue, Yvalue, -5.0);
+  glRotatef(Angle, 1.0, 1.0, 1.0);
+   
+  glClipPlane(GL_CLIP_PLANE0, equation); 
   glEnable(GL_CLIP_PLANE0);
-   glClear(GL_COLOR_BUFFER_BIT);
+  
+  glColor3f(0.0, 0.0, 0.0);
+  glutWireSphere(0.5, 16, 10);
 
-   glLoadIdentity();
-
-   // Set the position of the sphere.
-   glTranslatef(Xvalue, Yvalue, -5.0);
-   glRotatef(Angle, 1.0, 1.0, 1.0);
-
-   glColor3f(0.0, 0.0, 0.0);
-   glutWireSphere(0.5, 16, 10);
-
-   glutSwapBuffers();
+  glutSwapBuffers();
 }
 
 // Initialization routine.
@@ -78,6 +81,14 @@ void keyInput(unsigned char key, int x, int y)
          Angle += 10.0;
          glutPostRedisplay();
          break;
+   case '+':
+     height += 0.05;
+     glutPostRedisplay();
+     break;
+   case '-':
+     height -= 0.05;
+     glutPostRedisplay();
+     break;
       case 27:
          exit(0);
          break;

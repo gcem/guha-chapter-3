@@ -25,7 +25,7 @@
 using namespace std;
 
 // Globals.
-static int width, height; // OpenGL window size.
+static int width = 500, height = 500; // OpenGL window size.
 
 // Drawing routine.
 void drawScene(void)
@@ -67,7 +67,7 @@ void drawScene(void)
    glLineWidth(2.0);
    glBegin(GL_LINES);
       glVertex3f(0.1, 0.0, 0.0);
-	  glVertex3f(0.1, 100.0, 0.0);
+	  glVertex3f(0.1, 300.0 * height / width, 0.0);
    glEnd();
    glLineWidth(1.0);
    // End contents of second viewport.
@@ -86,7 +86,7 @@ void resize(int w, int h)
 {
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   glOrtho(0.0, 100.0, 0.0, 100.0, -1.0, 1.0);
+   glOrtho(0.0, 100.0, 0.0, 200.0 * height / width, -1.0, 1.0);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
